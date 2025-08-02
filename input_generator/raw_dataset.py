@@ -317,7 +317,7 @@ class SampleCollection:
             Striding to use for force projection results
         batch_size:
             Batching the coords and forces projection to CG
-        atoms_batch_size:  
+        atoms_batch_size:
             Batch size for processing atoms when inferring constrained atoms
 
         Returns
@@ -344,7 +344,13 @@ class SampleCollection:
                         break
 
                 cg_coords, cg_forces, cg_map, force_map = slice_coord_forces(
-                    coords, forces, self.cg_map, mapping, force_stride, batch_size, atoms_batch_size
+                    coords,
+                    forces,
+                    self.cg_map,
+                    mapping,
+                    force_stride,
+                    batch_size,
+                    atoms_batch_size,
                 )
                 # update the entries with the sparse version
                 self.cg_map = cg_map
@@ -610,7 +616,11 @@ class SampleCollection:
             return True
 
     def has_delta_forces_output(
-        self, training_data_dir: str, force_tag: str = "", mol_num_batches: int = 1, keep_batches: bool = False,
+        self,
+        training_data_dir: str,
+        force_tag: str = "",
+        mol_num_batches: int = 1,
+        keep_batches: bool = False,
     ) -> bool:
         """
         Returns True if cg data exists for this SampleCollection
