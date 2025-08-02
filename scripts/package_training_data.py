@@ -101,6 +101,7 @@ def package_training_data(
                     training_data_dir=training_data_dir,
                     force_tag=force_tag,
                     mol_num_batches=mol_num_batches,
+                    keep_batches=keep_batches
                 ):
                     continue
                 else:

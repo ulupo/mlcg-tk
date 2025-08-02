@@ -610,7 +610,7 @@ class SampleCollection:
             return True
 
     def has_delta_forces_output(
-        self, training_data_dir: str, force_tag: str = "", mol_num_batches: int = 1
+        self, training_data_dir: str, force_tag: str = "", mol_num_batches: int = 1, keep_batches: bool = False,
     ) -> bool:
         """
         Returns True if cg data exists for this SampleCollection
@@ -632,14 +632,16 @@ class SampleCollection:
         False otherwise
         """
         if mol_num_batches == 1:
-            pos_names_lists = [[self.tag, self.name]]
-        elif mol_num_batches > 1:
+            pos_names_lists = [[self.tag, self.mol_name]]
+        elif mol_num_batches > 1 and not keep_batches:
             pos_names_lists = [
-                [self.tag, self.name, f"batch_{b}"] for b in range(mol_num_batches)
+                [self.tag, self.mol_name, f"batch_{b}"] for b in range(mol_num_batches)
             ]
+        elif mol_num_batches > 1 and keep_batches:
+            pos_names_lists = [[self.tag, self.name]]
         else:
             raise ValueError(
-                f"`n_mol_batch` should be a positive integer, not {mol_num_batches}"
+                f"`mol_num_batches` should be a positive integer, not {mol_num_batches}"
             )
         for bat_list in pos_names_lists:
             save_templ = os.path.join(
