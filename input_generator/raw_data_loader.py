@@ -1290,25 +1290,19 @@ class MHC_loader(DatasetLoader):
                 chunk_ids = chunker(
                     [i for i in range(len(files))], n_batches=n_batches
                 )
-                files = files[np.array(chunk_ids[batch])]            
+                files = files[np.array(chunk_ids[batch])]
+                
                 for fn in tqdm(files):
                     data = np.load(fn, allow_pickle=True)
                     traj_coords.append(data["coords"])
-                    traj_forces.append(data["Fs"])            
+                    traj_forces.append(data["Fs"])
+                
                 if traj_coords:
                     coords_all.append(np.concatenate(traj_coords)[::stride])
-                    forces_all.append(np.concatenate(traj_forces)[::stride])        
+                    forces_all.append(np.concatenate(traj_forces)[::stride])
+                
         if not coords_all:
             raise RuntimeError(f"No trajectory data for {name}")       
         coords_all = np.concatenate(coords_all)
         forces_all = np.concatenate(forces_all)        
-        if n_batches > 1:
-            if batch is None:
-                raise ValueError("Missing batch index")
-            total = len(coords_all)
-            size = total // n_batches
-            start = batch * size
-            end = start + size if batch < n_batches - 1 else total
-            coords_all = coords_all[start:end]
-            forces_all = forces_all[start:end]      
         return coords_all, forces_all
