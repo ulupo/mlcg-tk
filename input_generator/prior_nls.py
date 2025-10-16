@@ -235,7 +235,7 @@ class Non_Bonded:
                 )
                 and (
                     graph.has_edge(p[0], p[1]) == False
-                    and check_graph_distance(graph, conn_comps, p[0], p[1], min_pair)
+                    and check_graph_distance(graph, topology, conn_comps, p[0], p[1], min_pair)
                 )
                 and not np.all(bond_edges == p[:, None], axis=0).any()
                 and not np.all(angle_edges[[0, 2], :] == p[:, None], axis=0).any()
