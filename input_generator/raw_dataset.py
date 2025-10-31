@@ -49,12 +49,6 @@ class CGDataBatch:
 
     Attributes
     ----------
-    batch_size:
-        Number of frames to use in each batch
-    stride:
-        Integer by which to stride frames
-    concat_forces:
-        Boolean indicating whether forces should be added to batch
     cg_coords:
         Coarse grained coordinates
     cg_forces:
@@ -63,6 +57,12 @@ class CGDataBatch:
         Atom embeddings
     cg_prior_nls:
         Dictionary of prior neighbour list
+    batch_size:
+        Number of frames to use in each batch
+    stride:
+        Integer by which to stride frames
+    concat_forces:
+        Boolean indicating whether forces should be added to batch
     """
 
     def __init__(
@@ -103,8 +103,33 @@ class CGDataBatch:
             self.batch_size = self.n_structure
 
         self.strides = get_strides(self.n_structure, self.batch_size)
+        #print(self.strides)
         self.n_elem = self.strides.shape[0]
-
+        
+        ## pre-building collated data object
+        #st, nd = self.strides[0]
+        #data_list = []
+        #for ii in range(st, nd):
+        #    dd = dict(
+        #        pos=self.cg_coords[ii],
+        #        atom_types=self.cg_embeds,
+        #        masses=None,
+        #        neighborlist=self.cg_prior_nls,
+        #    )
+        #    if self.concat_forces:
+        #        dd["forces"] = self.cg_forces[ii]
+        #    data = AtomicData.from_points(**dd)
+        #    if isinstance(self.weights, torch.Tensor):
+        #        data.weights = self.weights[ii]
+        #    data_list.append(data)
+        #coll_data, slices, _ = collate(
+        #    data_list[0].__class__,
+        #    data_list=data_list,
+        #    increment=True,
+        #    add_batch=True,
+        #)
+        #self.pre_collated_data = coll_data
+        
     def __len__(self):
         return self.n_elem
 
@@ -113,28 +138,34 @@ class CGDataBatch:
         Returns list of AtomicData objects for indexed batch
         """
         st, nd = self.strides[idx]
-        data_list = []
-        # TODO: build the collated AtomicData by hand to avoid copy/concat ops
-        for ii in range(st, nd):
-            dd = dict(
-                pos=self.cg_coords[ii],
-                atom_types=self.cg_embeds,
-                masses=None,
-                neighborlist=self.cg_prior_nls,
-            )
-            if self.concat_forces:
-                dd["forces"] = self.cg_forces[ii]
+        if True or idx == self.__len__:
+            data_list = []
+            # TODO: build the collated AtomicData by hand to avoid copy/concat ops
+            for ii in range(st, nd):
+                dd = dict(
+                    pos=self.cg_coords[ii],
+                    atom_types=self.cg_embeds,
+                    masses=None,
+                    neighborlist=self.cg_prior_nls,
+                )
+                if self.concat_forces:
+                    dd["forces"] = self.cg_forces[ii]
 
-            data = AtomicData.from_points(**dd)
-            if isinstance(self.weights, torch.Tensor):
-                data.weights = self.weights[ii]
-            data_list.append(data)
-        datas, slices, _ = collate(
-            data_list[0].__class__,
-            data_list=data_list,
-            increment=True,
-            add_batch=True,
-        )
+                data = AtomicData.from_points(**dd)
+                if isinstance(self.weights, torch.Tensor):
+                    data.weights = self.weights[ii]
+                data_list.append(data)
+            datas, slices, _ = collate(
+                data_list[0].__class__,
+                data_list=data_list,
+                increment=True,
+                add_batch=True,
+            )
+        else:
+            st, nd = self.strides[idx]
+            # use preexisting collated data
+            datas = self.pre_collated_data
+            datas.pos = self.cg_coords[slice(st,nd),:,:].reshape(-1,3)
         return datas
 
 

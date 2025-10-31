@@ -30,9 +30,9 @@ def package_training_data(
     single_protein: Optional[bool] = False,
     batch_size: int = 256,
     stride: int = 1,
-    train_size: Optional[Union[float, int, None]] = 0.8,
-    train_mols: Optional[List] = None,
-    val_mols: Optional[List] = None,
+    train_size: Union[float, int, None] = 0.8,
+    train_mols: Optional[List[str]] = None,
+    val_mols: Optional[List[str]] = None,
     random_state: Optional[str] = None,
     mol_num_batches: Optional[int] = 1,
     keep_batches: Optional[bool] = False,
@@ -305,6 +305,6 @@ def combine_datasets(
 if __name__ == "__main__":
     print("Start package_training_data.py: {}".format(ctime()))
 
-    CLI([package_training_data, combine_datasets])
+    CLI([package_training_data, combine_datasets],as_positional=False)
 
     print("Finish package_training_data.py: {}".format(ctime()))
