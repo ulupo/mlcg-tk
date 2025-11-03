@@ -10,6 +10,7 @@ from input_generator.prior_gen import PriorBuilder
 from input_generator.prior_fit import HistogramsNL
 from input_generator.prior_fit.fit_potentials import fit_potentials
 from input_generator.utils import get_output_tag
+from input_generator.prior_fit.utils import compute_nl_unique_keys
 from tqdm import tqdm
 import torch
 from time import ctime
@@ -117,6 +118,12 @@ def compute_statistics(
             all_nl_names
         ), f"some of the NL names '{nl_names}' in {dataset_name}:{samples.name} have not been registered in the nl_builder '{all_nl_names}'"
 
+        nl_names_key_list = {}
+        at_types = batch_list[0].atom_types
+        for nl_name in nl_names:
+            mapping = batch_list[0].neighbor_list[nl_name]["index_mapping"]
+            nl_names_key_list[nl_name] = compute_nl_unique_keys(at_types, mapping)
+
         if save_sample_statistics:
             sample_fnout = osp.join(
                 save_dir,
@@ -143,7 +150,7 @@ def compute_statistics(
                 batch = batch.to(device)
                 for nl_name in nl_names:
                     prior_builder = sample_nl_name2prior_builder[nl_name]
-                    prior_builder.accumulate_statistics(nl_name, batch)
+                    prior_builder.accumulate_statistics(nl_name, batch, nl_names_key_list[nl_name])
 
             with open(sample_fnout, "wb") as f:
                 pck.dump(sample_prior_builders, f)
@@ -154,7 +161,7 @@ def compute_statistics(
             batch = batch.to(device)
             for nl_name in nl_names:
                 prior_builder = nl_name2prior_builder[nl_name]
-                prior_builder.accumulate_statistics(nl_name, batch)
+                prior_builder.accumulate_statistics(nl_name, batch, nl_names_key_list[nl_name])
 
     key_map = {v: k for k, v in embedding_map.items()}
     if save_figs:
