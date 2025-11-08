@@ -3,10 +3,11 @@ h5py
 jsonargparse
 matplotlib
 mdtraj
-mlcg @ git+https://github.com/ClementiGroup/mlcg.git@0.0.1 -e
+mlcg @ git+https://github.com/ClementiGroup/mlcg.git@1.0.0 -e
 natsort
 networkx
 numpy 
+torchist
 pandas
 PyYAML
 scikit-learn

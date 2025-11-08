@@ -5,6 +5,7 @@ from typing import Dict, Optional
 from collections import defaultdict
 import numpy as np
 from copy import deepcopy
+import torchist
 
 from mlcg.data.atomic_data import AtomicData
 from mlcg.nn.prior import _Prior
@@ -224,15 +225,14 @@ def compute_hist(
         val = values[mask]
         if len(val) == 0:
             continue
-        bins = torch.linspace(bmin, bmax, steps=nbins + 1).type(val.dtype)
-
+        bins = torch.linspace(bmin, bmax, steps=nbins + 1).type(val.dtype).to(val.device)
         if isinstance(weights, torch.Tensor):
             n_atomgroups = int(val.shape[0] / weights.shape[0])
-            hist, _ = torch.histogram(
-                val, bins=bins, weight=weights.tile((n_atomgroups,))
+            hist = torchist.histogram(
+                val, edges=bins, weight=weights.tile((n_atomgroups,))
             )
         else:
-            hist, _ = torch.histogram(val, bins=bins)
+            hist = torchist.histogram(val, edges=bins)
         kk = tensor2tuple(unique_key)
         kf = tensor2tuple(_flip_map[order](unique_key))
         histograms[kk] = hist.cpu().numpy()
