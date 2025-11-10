@@ -218,11 +218,15 @@ def compute_hist_with_keys(
         val = values[mask]
         if isinstance(weights, torch.Tensor):
             n_atomgroups = int(val.shape[0] / weights.shape[0])
-            hist, _ = torch.histogram(
-                val, bins=bins, weight=weights.tile((n_atomgroups,))
+            #hist, _ = torch.histogram(
+            #    val, bins=bins, weight=weights.tile((n_atomgroups,))
+            #)
+            hist = torchist.histogram(
+                val, edges=bins, weight=weights.tile((n_atomgroups,))
             )
         else:
-            hist, _ = torch.histogram(val, bins=bins)
+            #hist, _ = torch.histogram(val, bins=bins)
+            hist = torchist.histogram(val, edges=bins)
 
         unique_key = unique_keys_in_data[:, idx]
         kk = tensor2tuple(unique_key)
