@@ -305,6 +305,6 @@ def combine_datasets(
 if __name__ == "__main__":
     print("Start package_training_data.py: {}".format(ctime()))
 
-    CLI([package_training_data, combine_datasets],as_positional=False)
+    CLI([package_training_data, combine_datasets], as_positional=False)
 
     print("Finish package_training_data.py: {}".format(ctime()))

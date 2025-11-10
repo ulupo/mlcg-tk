@@ -23,7 +23,7 @@ from jsonargparse import CLI
 
 
 def remove_baseline_forces_collated(
-    collated_data : AtomicData, model: SumOut
+    collated_data: AtomicData, model: SumOut
 ) -> AtomicData:
     """Compute the forces on the input :obj:`collated_data` with the :obj:`models`
     and remove them from the reference forces contained in :obj:`data_list`.
@@ -48,15 +48,12 @@ def remove_baseline_forces_collated(
         is added, whose value is equal to the baseline/prior forces
     """
 
-
     model.eval()
     collated_data = model(collated_data)
     baseline_forces = collated_data.out[FORCE_KEY].detach()
     collated_data.forces -= baseline_forces
     collated_data.baseline_forces = baseline_forces
     return collated_data
-
-
 
 
 def produce_delta_forces(
@@ -100,7 +97,7 @@ def produce_delta_forces(
         that were be treated as different samples
     """
 
-    #prior_model = torch.load(open(prior_fn, "rb")).models.to(device)
+    # prior_model = torch.load(open(prior_fn, "rb")).models.to(device)
     prior_model = torch.load(open(prior_fn, "rb")).to(device)
     dataset = RawDataset(dataset_name, names, tag, n_batches=mol_num_batches)
     for samples in tqdm(
@@ -113,7 +110,7 @@ def produce_delta_forces(
         )
 
         num_frames = coords.shape[0]
-        delta_forces = []        
+        delta_forces = []
         aux_data_list = [
             AtomicData.from_points(
                 pos=torch.tensor(coords[i]),
@@ -127,10 +124,10 @@ def produce_delta_forces(
         collated_data, _, _ = collate(aux_data_list[0].__class__, aux_data_list)
         collated_data = collated_data.to(device)
         slices = range(0, num_frames, batch_size)
-        n_chunks = len(slices)-1
+        n_chunks = len(slices) - 1
         for k in range(n_chunks):
-            current_frames = slice(slices[k],slices[k + 1])
-        
+            current_frames = slice(slices[k], slices[k + 1])
+
             collated_data.pos = torch.tensor(
                 coords[current_frames, :, :].reshape(-1, 3),
                 device=device,
@@ -143,28 +140,36 @@ def produce_delta_forces(
                 collated_data,
                 prior_model,
             )
-            delta_force = collated_data.forces.detach().cpu().reshape(slices[k + 1]-slices[k],-1,3)
+            delta_force = (
+                collated_data.forces.detach()
+                .cpu()
+                .reshape(slices[k + 1] - slices[k], -1, 3)
+            )
             delta_forces.append(delta_force.numpy())
         if slices[-1] < num_frames:
-            # final piece 
+            # final piece
             last_batch_size = num_frames - slices[-1]
-            collated_data, _, _ = collate(aux_data_list[0].__class__, aux_data_list[:last_batch_size])
+            collated_data, _, _ = collate(
+                aux_data_list[0].__class__, aux_data_list[:last_batch_size]
+            )
             collated_data = collated_data.to(device)
             collated_data.pos = torch.tensor(
-                    coords[slices[-1]:, :, :].reshape(-1, 3),
-                    device=device,
-                )
+                coords[slices[-1] :, :, :].reshape(-1, 3),
+                device=device,
+            )
             collated_data.forces = torch.tensor(
-                forces[slices[-1]:, :, :].reshape(-1, 3),
+                forces[slices[-1] :, :, :].reshape(-1, 3),
                 device=device,
             )
             _ = remove_baseline_forces_collated(
                 collated_data,
                 prior_model,
             )
-            delta_force = collated_data.forces.detach().cpu().reshape(last_batch_size,-1,3)
+            delta_force = (
+                collated_data.forces.detach().cpu().reshape(last_batch_size, -1, 3)
+            )
             delta_forces.append(delta_force.numpy())
-        
+
         fnout = os.path.join(
             save_dir,
             f"{get_output_tag([tag, samples.name, prior_tag, force_tag], placement='before')}delta_forces.npy",
