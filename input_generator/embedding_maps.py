@@ -138,21 +138,21 @@ extra_5bead = {
     "O": 24,
 }
 
-embedding_HP = { key : final_letter_map[val] for key, val in dict_HP.items() }
+embedding_map_HP = { key : final_letter_map[val] for key, val in dict_HP.items() }
 for key, val in extra_5bead.items():
-    embedding_HP[key] = val
+    embedding_map_HP[key] = val
 
-embedding_YhHX = { key : final_letter_map[val] for key, val in dict_YhHX.items() }
+embedding_map_YhHX = { key : final_letter_map[val] for key, val in dict_YhHX.items() }
 for key, val in extra_5bead.items():
-    embedding_YhHX[key] = val
+    embedding_map_YhHX[key] = val
 
-embedding_HPNX = { key : final_letter_map[val] for key, val in dict_HPNX.items() }
+embedding_map_HPNX = { key : final_letter_map[val] for key, val in dict_HPNX.items() }
 for key, val in extra_5bead.items():
-    embedding_HPNX[key] = val
+    embedding_map_HPNX[key] = val
 
-embedding_hHPNX = { key : final_letter_map[val] for key, val in dict_hHPNX.items() }
+embedding_map_hHPNX = { key : final_letter_map[val] for key, val in dict_hHPNX.items() }
 for key, val in extra_5bead.items():
-    embedding_hHPNX[key] = val
+    embedding_map_hHPNX[key] = val
 
 
 class CGEmbeddingMap(dict):
@@ -191,19 +191,19 @@ class CGEmbeddingMapCA(CGEmbeddingMap):
 
 class CGEmbeddingMapHP(CGEmbeddingMap):
     def __init__(self):
-        super().__init__(embedding_HP)
+        super().__init__(embedding_map_HP)
 
 class CGEmbeddingMapYhHX(CGEmbeddingMap):
     def __init__(self):
-        super().__init__(embedding_YhHX)
+        super().__init__(embedding_map_YhHX)
 
 class CGEmbeddingMapHPNX(CGEmbeddingMap):
     def __init__(self):
-        super().__init__(embedding_HPNX)
+        super().__init__(embedding_map_HPNX)
 
 class CGEmbeddingMaphHPNX(CGEmbeddingMap):
     def __init__(self):
-        super().__init__(embedding_hHPNX)
+        super().__init__(embedding_map_hHPNX)
 
 all_residues = [
     "ALA",
@@ -270,7 +270,7 @@ def embedding_ca_HP(atom_df):
     """
     name, res = atom_df["name"], atom_df["resName"]
     if name == "CA":
-        atom_type = embedding_HP[res]
+        atom_type = embedding_map_HP[res]
     else:
         print(f"Unknown atom name given: {name}")
         atom_type = "NA"
@@ -283,7 +283,7 @@ def embedding_ca_HPNX(atom_df):
     """
     name, res = atom_df["name"], atom_df["resName"]
     if name == "CA":
-        atom_type = embedding_HPNX[res]
+        atom_type = embedding_map_HPNX[res]
     else:
         print(f"Unknown atom name given: {name}")
         atom_type = "NA"
@@ -296,7 +296,7 @@ def embedding_ca_YhHX(atom_df):
     """
     name, res = atom_df["name"], atom_df["resName"]
     if name == "CA":
-        atom_type = embedding_YhHX[res]
+        atom_type = embedding_map_YhHX[res]
     else:
         print(f"Unknown atom name given: {name}")
         atom_type = "NA"
@@ -309,7 +309,90 @@ def embedding_ca_hHPNX(atom_df):
     """
     name, res = atom_df["name"], atom_df["resName"]
     if name == "CA":
-        atom_type = embedding_hHPNX[res]
+        atom_type = embedding_map_hHPNX[res]
+    else:
+        print(f"Unknown atom name given: {name}")
+        atom_type = "NA"
+    return atom_type
+
+
+def embedding_fivebead_HP(atom_df):
+    """
+    Helper function for mapping high-resolution topology to
+    5-bead embedding map.
+    """
+    name, res = atom_df["name"], atom_df["resName"]
+    if name in ["N", "C", "O"]:
+        atom_type = embedding_map_HP[name]
+    elif name == "CA":
+        if res == "GLY":
+            atom_type = embedding_map_HP["GLY"]
+        else:
+            atom_type = embedding_map_HP[name]
+    elif name == "CB":
+        atom_type = embedding_map_HP[res]
+    else:
+        print(f"Unknown atom name given: {name}")
+        atom_type = "NA"
+    return atom_type
+
+
+def embedding_fivebead_YhHX(atom_df):
+    """
+    Helper function for mapping high-resolution topology to
+    5-bead embedding map.
+    """
+    name, res = atom_df["name"], atom_df["resName"]
+    if name in ["N", "C", "O"]:
+        atom_type = embedding_map_YhHX[name]
+    elif name == "CA":
+        if res == "GLY":
+            atom_type = embedding_map_YhHX["GLY"]
+        else:
+            atom_type = embedding_map_YhHX[name]
+    elif name == "CB":
+        atom_type = embedding_map_YhHX[res]
+    else:
+        print(f"Unknown atom name given: {name}")
+        atom_type = "NA"
+    return atom_type
+
+def embedding_fivebead_HPNX(atom_df):
+    """
+    Helper function for mapping high-resolution topology to
+    5-bead embedding map.
+    """
+    name, res = atom_df["name"], atom_df["resName"]
+    if name in ["N", "C", "O"]:
+        atom_type = embedding_map_HPNX[name]
+    elif name == "CA":
+        if res == "GLY":
+            atom_type = embedding_map_HPNX["GLY"]
+        else:
+            atom_type = embedding_map_HPNX[name]
+    elif name == "CB":
+        atom_type = embedding_map_HPNX[res]
+    else:
+        print(f"Unknown atom name given: {name}")
+        atom_type = "NA"
+    return atom_type
+
+
+def embedding_fivebead_hHPNX(atom_df):
+    """
+    Helper function for mapping high-resolution topology to
+    5-bead embedding map.
+    """
+    name, res = atom_df["name"], atom_df["resName"]
+    if name in ["N", "C", "O"]:
+        atom_type = embedding_map_hHPNX[name]
+    elif name == "CA":
+        if res == "GLY":
+            atom_type = embedding_map_hHPNX["GLY"]
+        else:
+            atom_type = embedding_map_hHPNX[name]
+    elif name == "CB":
+        atom_type = embedding_map_hHPNX[res]
     else:
         print(f"Unknown atom name given: {name}")
         atom_type = "NA"

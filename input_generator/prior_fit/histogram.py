@@ -70,6 +70,7 @@ class HistogramsNL:
         mapping:
             Tensor of atom groups for which values have been computed
         """
+        print(nl_name)
         hists = compute_hist_with_keys(
             values,
             key_dict,
@@ -203,13 +204,16 @@ def compute_hist_with_keys(
     inverse_indices = key_dict["inverse_indices"]
 
     histograms = {}
-
+    if unique_keys_in_data.numel() == 0:
+        return histograms
     n_unique_keys = unique_keys_in_data.shape[1]
 
     bins = torch.linspace(
         bmin, bmax, steps=nbins + 1, dtype=values.dtype, device=values.device
     )
-
+    print(f"values shape: {values.shape}")
+    print(f"inverse_indices shape: {inverse_indices.shape}")
+    print(f"inverse_indices[0:10]: {inverse_indices[0:10]}")
     for idx in range(n_unique_keys):
         mask = inverse_indices == idx
         if not mask.any():
@@ -218,14 +222,10 @@ def compute_hist_with_keys(
         val = values[mask]
         if isinstance(weights, torch.Tensor):
             n_atomgroups = int(val.shape[0] / weights.shape[0])
-            # hist, _ = torch.histogram(
-            #    val, bins=bins, weight=weights.tile((n_atomgroups,))
-            # )
             hist = torchist.histogram(
                 val, edges=bins, weight=weights.tile((n_atomgroups,))
             )
         else:
-            # hist, _ = torch.histogram(val, bins=bins)
             hist = torchist.histogram(val, edges=bins)
 
         unique_key = unique_keys_in_data[:, idx]
