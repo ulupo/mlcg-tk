@@ -40,28 +40,33 @@ def compute_nl_unique_keys(
         [atom_types[mapping[ii]] for ii in range(order)], dim=0
     )
     interaction_types_sym = _symmetrise_map[order](interaction_types)
+    if interaction_types_sym.numel() >0 :
+        max_type = interaction_types_sym.max().item() + 1
+        multipliers = torch.tensor(
+            [max_type**i for i in range(order)],
+            dtype=torch.long,
+            device=interaction_types_sym.device,
+        )
+        hashed = (interaction_types_sym.long() * multipliers.unsqueeze(1)).sum(dim=0)
 
-    max_type = interaction_types_sym.max().item() + 1
-    multipliers = torch.tensor(
-        [max_type**i for i in range(order)],
-        dtype=torch.long,
-        device=interaction_types_sym.device,
-    )
-    hashed = (interaction_types_sym.long() * multipliers.unsqueeze(1)).sum(dim=0)
+        unique_hashes, inverse_indices = torch.unique(hashed, return_inverse=True)
+        n_unique = len(unique_hashes)
 
-    unique_hashes, inverse_indices = torch.unique(hashed, return_inverse=True)
-    n_unique = len(unique_hashes)
+        first_occurrences = torch.zeros(n_unique, dtype=torch.long, device=hashed.device)
+        for i, h in enumerate(unique_hashes):
+            first_occurrences[i] = (hashed == h).nonzero(as_tuple=True)[0][0]
+        unique_keys_in_data = interaction_types_sym[:, first_occurrences]
 
-    first_occurrences = torch.zeros(n_unique, dtype=torch.long, device=hashed.device)
-    for i, h in enumerate(unique_hashes):
-        first_occurrences[i] = (hashed == h).nonzero(as_tuple=True)[0][0]
-    unique_keys_in_data = interaction_types_sym[:, first_occurrences]
-
-    nl_keys_dict = {
-        "order": order,
-        "unique_keys_in_data": unique_keys_in_data,
-        "inverse_indices": inverse_indices,
-        "unique_hashes": unique_hashes,
-    }
+        nl_keys_dict = {
+            "order": order,
+            "unique_keys_in_data": unique_keys_in_data,
+            "inverse_indices": inverse_indices,
+        }
+    else:
+        nl_keys_dict = {
+            "order": order,
+            "unique_keys_in_data": torch.tensor([]),
+            "inverse_indices": torch.tensor([]),
+        }
 
     return nl_keys_dict

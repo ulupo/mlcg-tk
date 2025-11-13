@@ -17,12 +17,18 @@ from .raw_data_loader import (
 )
 
 
+#from .embedding_maps import (
+#    CGEmbeddingMap,
+#    CGEmbeddingMapFiveBead,
+#    CGEmbeddingMapCA,
+#    embedding_fivebead,
+#    embedding_ca,
+#)
 from .embedding_maps import (
     CGEmbeddingMap,
     CGEmbeddingMapFiveBead,
     CGEmbeddingMapCA,
-    embedding_fivebead,
-    embedding_ca,
+    CGEmbeddingMapHP,
 )
 
 

@@ -92,6 +92,19 @@ def compute_statistics(
             nl_name2prior_builder[nl_name] = prior_builder
 
     dataset = RawDataset(dataset_name, names, tag, n_batches=mol_num_batches)
+    tmp_batch = dataset[0].load_cg_output_into_batches(
+        save_dir, prior_tag, 1, 1, weights_template_fn=weights_template_fn
+    )[0]
+    nl_names = set(tmp_batch.neighbor_list.keys())
+    assert nl_names.issubset(
+        all_nl_names
+    ), f"some of the NL names '{nl_names}' in {dataset_name}:{tmp_batch.name} have not been registered in the nl_builder '{all_nl_names}'"
+    nl_names_key_list = {}
+    atom_types = tmp_batch.atom_types
+    for nl_name in nl_names:
+            mapping = tmp_batch.neighbor_list[nl_name]["index_mapping"]
+            nl_names_key_list[nl_name] = compute_nl_unique_keys(atom_types, mapping)
+
     for samples in tqdm(
         dataset, f"Compute histograms of CG data for {dataset_name} dataset..."
     ):
@@ -113,16 +126,9 @@ def compute_statistics(
             weights_template_fn=weights_template_fn,
         )
         nl_names = set(batch_list[0].neighbor_list.keys())
-
         assert nl_names.issubset(
             all_nl_names
         ), f"some of the NL names '{nl_names}' in {dataset_name}:{samples.name} have not been registered in the nl_builder '{all_nl_names}'"
-
-        nl_names_key_list = {}
-        at_types = batch_list[0].atom_types
-        for nl_name in nl_names:
-            mapping = batch_list[0].neighbor_list[nl_name]["index_mapping"]
-            nl_names_key_list[nl_name] = compute_nl_unique_keys(at_types, mapping)
 
         if save_sample_statistics:
             sample_fnout = osp.join(
@@ -143,7 +149,6 @@ def compute_statistics(
                         prior_builder.histograms.data.pop(nl_name)
                     prior_builder.histograms.data[nl_name].clear()
                     sample_nl_name2prior_builder[nl_name] = prior_builder
-
             for batch in tqdm(
                 batch_list, f"molecule name: {samples.name}", leave=False
             ):
@@ -158,14 +163,14 @@ def compute_statistics(
                 pck.dump(sample_prior_builders, f)
 
             continue  # does not save accumulated statistics if sample statistics saved
-
+        
         for batch in tqdm(batch_list, f"molecule name: {samples.name}", leave=False):
             batch = batch.to(device)
             for nl_name in nl_names:
-                prior_builder = nl_name2prior_builder[nl_name]
-                prior_builder.accumulate_statistics(
-                    nl_name, batch, nl_names_key_list[nl_name]
-                )
+                    prior_builder = nl_name2prior_builder[nl_name]
+                    prior_builder.accumulate_statistics(
+                        nl_name, batch, nl_names_key_list[nl_name]
+                    )
 
     key_map = {v: k for k, v in embedding_map.items()}
     if save_figs:

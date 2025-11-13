@@ -70,7 +70,7 @@ class HistogramsNL:
         mapping:
             Tensor of atom groups for which values have been computed
         """
-        hists = compute_hist_with_keys(
+        hists = compute_hist_with_rep(
             values,
             key_dict,
             self.n_bins,
@@ -204,6 +204,9 @@ def compute_hist_with_keys(
 
     histograms = {}
 
+    if unique_keys_in_data.numel() == 0:
+        return histograms
+    
     n_unique_keys = unique_keys_in_data.shape[1]
 
     bins = torch.linspace(
@@ -212,6 +215,8 @@ def compute_hist_with_keys(
 
     for idx in range(n_unique_keys):
         mask = inverse_indices == idx
+#        print(f"Shape of values: {values.shape}, shape of mask: {mask.shape}")
+#        print(f"Mask first 10 values: {mask[:10]}")
         if not mask.any():
             continue
 
@@ -236,6 +241,79 @@ def compute_hist_with_keys(
 
     return histograms
 
+def compute_hist_with_rep(
+    values: torch.Tensor,
+    key_dict: dict,
+    nbins: int,
+    bmin: float,
+    bmax: float,
+    weights: Optional[torch.Tensor],
+) -> Dict:
+    """
+    Compute histograms using precomputed unique keys for this nl_name.
+    
+    Parameters
+    ----------
+    values : torch.Tensor
+        Computed feature values for the batch
+    key_dict : dict
+        Dictionary with unique keys from single frame
+    nbins : int
+        Number of histogram bins
+    bmin : float
+        Minimum bin value
+    bmax : float
+        Maximum bin value
+    weights : Optional[torch.Tensor]
+        Optional weights for histogram computation
+    batch_size : int
+        Number of structures in the batch
+    """
+    order = key_dict["order"]
+    unique_keys_in_data = key_dict["unique_keys_in_data"]
+    
+    # Expand inverse indices for the batch
+    inverse_indices_template = key_dict["inverse_indices"]
+    if inverse_indices_template.numel() == 0:
+        return {}
+    else:
+        repeat_factor = values.shape[0] // inverse_indices_template.shape[0]
+        inverse_indices = inverse_indices_template.repeat(repeat_factor)
+    
+    histograms = {}
+    if unique_keys_in_data.numel() == 0:
+        return histograms
+    
+    n_unique_keys = unique_keys_in_data.shape[1]
+
+    bins = torch.linspace(
+        bmin, bmax, steps=nbins + 1, dtype=values.dtype, device=values.device
+    )
+
+    for idx in range(n_unique_keys):
+        mask = inverse_indices == idx
+        
+        if not mask.any():
+            continue
+
+        val = values[mask]
+        
+        if isinstance(weights, torch.Tensor):
+            # Weights are per structure, need to tile for all interactions
+            n_atomgroups = int(val.shape[0] / weights.shape[0])
+            hist = torchist.histogram(
+                val, edges=bins, weight=weights.tile((n_atomgroups,))
+            )
+        else:
+            hist = torchist.histogram(val, edges=bins)
+
+        unique_key = unique_keys_in_data[:, idx]
+        kk = tensor2tuple(unique_key)
+        kf = tensor2tuple(_flip_map[order](unique_key))
+        histograms[kk] = hist.cpu().numpy()
+        histograms[kf] = deepcopy(hist.cpu().numpy())
+
+    return histograms
 
 def compute_hist(
     values: torch.Tensor,
