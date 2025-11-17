@@ -227,7 +227,9 @@ def fit_priors(
             nl_names.append(nl_name)
             nl_name2prior_builder[nl_name] = prior_builder
     prior_models = {}
-    for nl_name in nl_names:
+    pbar = tqdm(nl_names)
+    for nl_name in pbar:
+        pbar.set_description(f"Fiting prior {nl_name}")
         prior_builder = nl_name2prior_builder[nl_name]
         prior_model = fit_potentials(
             nl_name=nl_name,
