@@ -352,6 +352,8 @@ class SampleCollection:
             else:  # all frames were removed by cis-filtering
                 cg_coords = None
                 cg_forces = None
+                self.cg_map = None
+                self.force_map = None
 
             self.cg_coords = cg_coords
             self.cg_forces = cg_forces
@@ -432,15 +434,15 @@ class SampleCollection:
                 np.save(f"{save_templ}cg_forces.npy", cg_forces)
 
         if save_cg_maps:
-            if not hasattr(self, "cg_map"):
-                warnings.warn("No cg coordinate map found. Skipping save.")
-            else:
+            if hasattr(self, "cg_map") and self.cg_map is not None:
                 np.save(f"{mol_save_templ}cg_coord_map.npy", self.cg_map.toarray())
-
-            if not hasattr(self, "force_map"):
-                warnings.warn("No cg force map found. Skipping save.")
             else:
+                warnings.warn("No cg coordinate map found. Skipping save.")
+
+            if hasattr(self, "force_map") and self.force_map is not None:
                 np.save(f"{mol_save_templ}cg_force_map.npy", self.force_map.toarray())
+            else:
+                warnings.warn("No cg force map found. Skipping save.")
 
     def load_cg_force_map(self, save_dir: str) -> np.ndarray:
         """
