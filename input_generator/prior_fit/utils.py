@@ -61,14 +61,12 @@ def compute_nl_unique_keys(
             "order": order,
             "unique_keys_in_data": unique_keys_in_data,
             "inverse_indices": inverse_indices,
-            "unique_hashes": unique_hashes,
         }
     else:
-         nl_keys_dict = {
+        nl_keys_dict = {
             "order": order,
             "unique_keys_in_data": torch.tensor([]),
             "inverse_indices": torch.tensor([]),
-            "unique_hashes": torch.tensor([]),
         }
 
     return nl_keys_dict

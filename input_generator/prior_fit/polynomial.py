@@ -129,7 +129,7 @@ def _polynomial_fit(
             f"regression method {regression_method} is not in {_valid_regression_methods} "
         )
     if popt[-1] <= 0:
-        print()
+        print("Warning: leading coefficient is negative, this might create problems")
     return popt
 
 
