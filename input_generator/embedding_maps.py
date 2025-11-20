@@ -28,6 +28,30 @@ embedding_map_fivebead = {
     "O": 24,
 }
 
+dict_H = {
+    'ALA': 'H',  # A
+    'CYS': 'H',  # C
+    'ASP': 'H',  # D
+    'GLU': 'H',  # E
+    'PHE': 'H',  # F
+    'GLY': 'H',  # G
+    'HIS': 'H',  # H
+    'ILE': 'H',  # I
+    'LYS': 'H',  # K
+    'LEU': 'H',  # L
+    'NLE': 'H',  # L
+    'MET': 'H',  # M
+    'ASN': 'H',  # N
+    'PRO': 'H',  # P
+    'GLN': 'H',  # Q
+    'ARG': 'H',  # R
+    'SER': 'H',  # S
+    'THR': 'H',  # T
+    'VAL': 'H',  # V
+    'TRP': 'H',  # W
+    'TYR': 'H',  # Y
+}
+
 dict_HP = {
     'ALA': 'H',  # A
     'CYS': 'H',  # C
@@ -39,6 +63,7 @@ dict_HP = {
     'ILE': 'H',  # I
     'LYS': 'P',  # K
     'LEU': 'H',  # L
+    'NLE': 'H',  # L
     'MET': 'H',  # M
     'ASN': 'P',  # N
     'PRO': 'H',  # P
@@ -63,6 +88,7 @@ dict_HPNX = {
     'ILE': 'H',  # I
     'LYS': 'P',  # K
     'LEU': 'H',  # L
+    'NLE': 'H',  # L
     'MET': 'H',  # M
     'ASN': 'X',  # N
     'PRO': 'X',  # P
@@ -87,6 +113,7 @@ dict_hHPNX = {
     'ILE': 'H',  # I
     'LYS': 'P',  # K
     'LEU': 'H',  # L
+    'NLE': 'H',  # L/
     'MET': 'H',  # M
     'ASN': 'X',  # N
     'PRO': 'X',  # P
@@ -100,7 +127,7 @@ dict_hHPNX = {
 }
 
 dict_YhHX = {
-    'ALA': 'H',  # A
+    'ALA': 'h',  # A
     'CYS': 'H',  # C
     'ASP': 'Y',  # D
     'GLU': 'Y',  # E
@@ -110,6 +137,7 @@ dict_YhHX = {
     'ILE': 'H',  # I
     'LYS': 'Y',  # K
     'LEU': 'H',  # L
+    'NLE': 'H',  # L
     'MET': 'H',  # M
     'ASN': 'Y',  # N
     'PRO': 'X',  # P
@@ -117,7 +145,7 @@ dict_YhHX = {
     'ARG': 'Y',  # R
     'SER': 'X',  # S
     'THR': 'X',  # T
-    'VAL': 'H',  # V
+    'VAL': 'h',  # V
     'TRP': 'H',  # W
     'TYR': 'Y'   # Y
 }
@@ -137,6 +165,10 @@ extra_5bead = {
     "C": 23,
     "O": 24,
 }
+
+embedding_map_H = { key : final_letter_map[val] for key, val in dict_H.items() }
+for key, val in extra_5bead.items():
+    embedding_map_H[key] = val
 
 embedding_map_HP = { key : final_letter_map[val] for key, val in dict_HP.items() }
 for key, val in extra_5bead.items():
@@ -189,6 +221,9 @@ class CGEmbeddingMapCA(CGEmbeddingMap):
         ca_dict = {key: emb for key, emb in embedding_map_fivebead.items() if emb <= 20}
         super().__init__(ca_dict)
 
+class CGEmbeddingMapH(CGEmbeddingMap):
+    def __init__(self):
+        super().__init__(embedding_map_H)
 class CGEmbeddingMapHP(CGEmbeddingMap):
     def __init__(self):
         super().__init__(embedding_map_HP)
@@ -262,6 +297,20 @@ def embedding_ca(atom_df):
         print(f"Unknown atom name given: {name}")
         atom_type = "NA"
     return atom_type
+
+def embedding_ca_H(atom_df):
+    """
+    Helper function for mapping high-resolution topology to
+    CA embedding map.
+    """
+    name, res = atom_df["name"], atom_df["resName"]
+    if name == "CA":
+        atom_type = embedding_map_H[res]
+    else:
+        print(f"Unknown atom name given: {name}")
+        atom_type = "NA"
+    return atom_type
+
 
 def embedding_ca_HP(atom_df):
     """
