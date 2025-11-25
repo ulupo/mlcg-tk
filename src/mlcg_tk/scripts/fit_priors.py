@@ -1,15 +1,15 @@
 import os.path as osp
 import sys
 
-SCRIPT_DIR = osp.abspath(osp.dirname(__file__))
-sys.path.insert(0, osp.join(SCRIPT_DIR, "../"))
+# SCRIPT_DIR = osp.abspath(osp.dirname(__file__))
+# sys.path.insert(0, osp.join(SCRIPT_DIR, "../"))
 
-from input_generator.raw_dataset import RawDataset
-from input_generator.embedding_maps import CGEmbeddingMap
-from input_generator.prior_gen import PriorBuilder
-from input_generator.prior_fit import HistogramsNL
-from input_generator.prior_fit.fit_potentials import fit_potentials
-from input_generator.utils import get_output_tag
+from mlcg_tk.input_generator.raw_dataset import RawDataset
+from mlcg_tk.input_generator.embedding_maps import CGEmbeddingMap
+from mlcg_tk.input_generator.prior_gen import PriorBuilder
+from mlcg_tk.input_generator.prior_fit import HistogramsNL
+from mlcg_tk.input_generator.prior_fit.fit_potentials import fit_potentials
+from mlcg_tk.input_generator.utils import get_output_tag
 from tqdm import tqdm
 import torch
 from time import ctime
@@ -225,10 +225,11 @@ def fit_priors(
     full_prior_model = SumOut(modules, targets=["energy", "forces"])
     torch.save(full_prior_model, fnout)
 
+def main():
+    print("Start fit_priors.py: {}".format(ctime()))
+    CLI([compute_statistics, fit_priors])
+    print("Finish fit_priors.py: {}".format(ctime()))
+
 
 if __name__ == "__main__":
-    print("Start fit_priors.py: {}".format(ctime()))
-
-    CLI([compute_statistics, fit_priors])
-
-    print("Finish fit_priors.py: {}".format(ctime()))
+    main()
