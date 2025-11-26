@@ -1,6 +1,6 @@
 [build-system]
-requires = ["uv_build >= 0.9.9,<0.10.0"]
-build-backend = "uv_build"
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlcg_tk"
@@ -19,12 +19,12 @@ authors = [
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
-    "aggforce",
+    "aggforce @ git+https://github.com/noegroup/aggforce.git",
     "h5py>=3.15.1",
     "jsonargparse>=4.42.0",
     "matplotlib>=3.10.7",
     "mdtraj>=1.11.0",
-    "mlcg",
+    "mlcg @ git+https://github.com/ClementiGroup/mlcg.git@v0.1.1",
     "natsort>=8.4.0",
     "networkx>=3.3",
     "numpy>=1.26.4",
@@ -39,17 +39,15 @@ dependencies = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python :: 3.12",
-  "License :: OSI Approved :: MIT License"
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mlcg_tk*", "input_generator*"]
 
 [project.urls]
 Homepage = "https://github.com/ClementiGroup/mlcg-tk"
 Issues = "https://github.com/ClementiGroup/mlcg-tk/issues"
-
-[tool.uv.sources]
-aggforce = { git = "https://github.com/noegroup/aggforce.git" }
-mlcg = { git = "https://github.com/ClementiGroup/mlcg.git", rev = "v0.1.1" }
-
 
 [project.scripts]
 mlcg-tk-add_decoys = "mlcg_tk.scripts.add_decoys:main"
