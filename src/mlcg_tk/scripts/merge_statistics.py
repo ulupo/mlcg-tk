@@ -2,9 +2,6 @@ import os.path as osp
 import warnings
 import sys
 
-# SCRIPT_DIR = osp.abspath(osp.dirname(__file__))
-# sys.path.insert(0, osp.join(SCRIPT_DIR, "../"))
-
 import pickle as pkl
 
 from mlcg_tk.input_generator.prior_gen import PriorBuilder

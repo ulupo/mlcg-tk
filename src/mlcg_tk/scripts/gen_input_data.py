@@ -1,9 +1,6 @@
 import os.path as osp
 import sys
 
-# SCRIPT_DIR = osp.abspath(osp.dirname(__file__))
-# sys.path.insert(0, osp.join(SCRIPT_DIR, "../"))
-
 from mlcg_tk.input_generator.raw_dataset import SampleCollection, RawDataset
 from mlcg_tk.input_generator.embedding_maps import (
     CGEmbeddingMap,
