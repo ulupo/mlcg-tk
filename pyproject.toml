@@ -15,6 +15,7 @@ authors = [
   {name = "Luca Sagresti"},
   {name = "Edoardo Rolando"},
   {name = "Jacopo Venturin"},
+  {name = "Felix Musil"},
 ]
 license = "MIT"
 license-files = ["LICENSE"]
