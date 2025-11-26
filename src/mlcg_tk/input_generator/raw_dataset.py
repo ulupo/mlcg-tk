@@ -1,5 +1,6 @@
 import mdtraj as md
 import pickle
+import pandas as pd
 
 from typing import List, Dict, Tuple, Optional, Union
 from copy import deepcopy
@@ -396,7 +397,10 @@ class SampleCollection:
             save_dir, get_output_tag([self.tag, self.name], placement="before")
         )
         cg_xyz = self.input_traj.atom_slice(self.cg_atom_indices).xyz
-        self.cg_dataframe.formal_charge = self.cg_dataframe.formal_charge.fillna(0) # Clean pd dataframe from <NA entries> before saving
+
+        with pd.option_context('future.no_silent_downcasting', True):# Clean pd dataframe from <NA entries> before saving
+            self.cg_dataframe.formal_charge = self.cg_dataframe.formal_charge.fillna(0) 
+
         cg_traj = md.Trajectory(cg_xyz, md.Topology.from_dataframe(self.cg_dataframe))
         cg_traj.save_pdb(f"{mol_save_templ}cg_structure.pdb")
 
