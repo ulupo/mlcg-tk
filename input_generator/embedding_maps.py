@@ -77,77 +77,75 @@ dict_HP = {
 }
 
 
+
 dict_HPNX = {
-    'ALA': 'H',  # A
-    'CYS': 'H',  # C
-    'ASP': 'N',  # D
-    'GLU': 'N',  # E
-    'PHE': 'H',  # F
-    'GLY': 'X',  # G
-    'HIS': 'P',  # H
-    'ILE': 'H',  # I
-    'LYS': 'P',  # K
-    'LEU': 'H',  # L
-    'NLE': 'H',  # L
-    'MET': 'H',  # M
-    'ASN': 'X',  # N
-    'PRO': 'X',  # P
-    'GLN': 'X',  # Q
-    'ARG': 'Y',  # R
-    'SER': 'X',  # S
-    'THR': 'X',  # T
-    'VAL': 'H',  # V
-    'TRP': 'H',  # W
-    'TYR': 'Y'   # Y
+    'ARG': 'P',
+    'HIS': 'P',
+    'LYS': 'P',
+    'ASP': 'N',
+    'GLU': 'N',
+    'ASN': 'X',
+    'CYS': 'X',
+    'GLN': 'X',
+    'SER': 'X',
+    'THR': 'X',
+    'TYR': 'X',
+    'ALA': 'H',
+    'GLY': 'H',
+    'ILE': 'H',
+    'LEU': 'H',
+    'MET': 'H',
+    'PHE': 'H',
+    'PRO': 'H',
+    'TRP': 'H',
+    'VAL': 'H'
 }
 
 
 dict_hHPNX = {
-    'ALA': 'h',  # A
-    'CYS': 'H',  # C
-    'ASP': 'N',  # D
-    'GLU': 'N',  # E
-    'PHE': 'H',  # F
-    'GLY': 'X',  # G
-    'HIS': 'P',  # H
-    'ILE': 'H',  # I
-    'LYS': 'P',  # K
-    'LEU': 'H',  # L
-    'NLE': 'H',  # L/
-    'MET': 'H',  # M
-    'ASN': 'X',  # N
-    'PRO': 'X',  # P
-    'GLN': 'X',  # Q
-    'ARG': 'Y',  # R
-    'SER': 'X',  # S
-    'THR': 'X',  # T
-    'VAL': 'h',  # V
-    'TRP': 'H',  # W
-    'TYR': 'Y'   # Y
+    'ARG': 'P',
+    'HIS': 'P',
+    'LYS': 'P',
+    'ASP': 'N',
+    'GLU': 'N',
+    'ASN': 'X',
+    'CYS': 'X',
+    'GLN': 'X',
+    'SER': 'X',
+    'THR': 'X',
+    'TYR': 'X',
+    'ALA': 'h',
+    'GLY': 'H',
+    'ILE': 'H',
+    'LEU': 'H',
+    'MET': 'H',
+    'PHE': 'H',
+    'PRO': 'H',
+    'TRP': 'H',
+    'VAL': 'h'
 }
 
 dict_YhHX = {
-    'ALA': 'h',  # A
-    'CYS': 'H',  # C
-    'ASP': 'Y',  # D
-    'GLU': 'Y',  # E
-    'PHE': 'H',  # F
-    'GLY': 'X',  # G
-    'HIS': 'Y',  # H
-    'ILE': 'H',  # I
-    'LYS': 'Y',  # K
-    'LEU': 'H',  # L
-    'NLE': 'H',  # L
-    'MET': 'H',  # M
-    'ASN': 'Y',  # N
-    'PRO': 'X',  # P
-    'GLN': 'X',  # Q
-    'ARG': 'Y',  # R
-    'SER': 'X',  # S
-    'THR': 'X',  # T
-    'VAL': 'h',  # V
-    'TRP': 'H',  # W
-    'TYR': 'Y'   # Y
+    'ARG': 'Y',
+    'HIS': 'Y',
+    'LYS': 'X',
+    'ASP': 'X',
+    'GLU': 'Y',
+    'ASN': 'Y',
+    'CYS': 'H',
+    'GLN': 'X',
+    'SER': 'Y',
+    'THR': 'X',
+    'TYR': 'Y',
+    'ALA': 'h',
+    'GLY': 'Y',
+    'ILE': 'H',
+    'LEU': 'H',
+    'MET': 'H',
+    'PHE': 'H',
+    'PRO': 'X',
+    'TRP': 'X',
+    'VAL': 'h'
 }
 
 final_letter_map = {
