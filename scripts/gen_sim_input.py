@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 from time import ctime
 
-from typing import Dict, List, Union, Callable, Optional
+from typing import Dict, List, Union, Callable, Optional, Type
 from jsonargparse import CLI
 import pickle as pck
 
@@ -40,6 +40,7 @@ def process_sim_input(
     prior_tag: str,
     prior_builders: List[PriorBuilder],
     mass_scale: Optional[float] = 418.4,
+    collection_cls: Type[SampleCollection] = SampleCollection,
 ):
     """
     Generates input AtomicData objects for coarse-grained simulations
@@ -78,7 +79,7 @@ def process_sim_input(
     cg_mass_list = []
     cg_nls_list = []
 
-    dataset = SimInput(dataset_name, tag, pdb_fns)
+    dataset = SimInput(dataset_name, tag, pdb_fns, collection_cls=collection_cls)
     for samples in tqdm(dataset, f"Processing CG data for {dataset_name} dataset..."):
         sample_loader = SimInput_loader()
         samples.input_traj, samples.top_dataframe = sample_loader.get_traj_top(
