@@ -52,14 +52,14 @@ Homepage = "https://github.com/ClementiGroup/mlcg-tk"
 Issues = "https://github.com/ClementiGroup/mlcg-tk/issues"
 
 [project.scripts]
-mlcg-tk-add_decoys = "mlcg_tk.scripts.add_decoys:main"
-mlcg-tk-fit_priors = "mlcg_tk.scripts.fit_priors:main"
+
 mlcg-tk-gen_input_data = "mlcg_tk.scripts.gen_input_data:main"
-mlcg-tk-gen_sim_input = "mlcg_tk.scripts.gen_sim_input:main"
+mlcg-tk-fit_priors = "mlcg_tk.scripts.fit_priors:main"
 mlcg-tk-merge_statistics = "mlcg_tk.scripts.merge_statistics:main"
 mlcg-tk-package_training_data = "mlcg_tk.scripts.package_training_data:main"
 mlcg-tk-produce_delta_forces = "mlcg_tk.scripts.produce_delta_forces:main"
-
+mlcg-tk-add_decoys = "mlcg_tk.scripts.add_decoys:main"
+mlcg-tk-gen_sim_input = "mlcg_tk.scripts.gen_sim_input:main"
 
 
 
