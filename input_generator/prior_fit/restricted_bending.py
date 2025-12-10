@@ -14,9 +14,11 @@ def restricted_quartic_angle(x, a, b, c, d, k, v_0):
         + \frac{k}{\sin^2(\theta)} + V0
 
     """
+    cos = torch.cos(x)
+    sin = torch.sin(x)
 
-    quart = a * x**4 + b * x**3 + c * x**2 + d * x
-    rep = k / (1-x**2)
+    quart = a * cos**4 + b * cos**3 + c * cos**2 + d * cos
+    rep = k / (sin**2)
     V = quart + rep + v_0
 
     return V
@@ -24,8 +26,11 @@ def restricted_quartic_angle(x, a, b, c, d, k, v_0):
 def dx_restricted_quartic_angle(x, a, b, c, d, k):
     """Derivative of the restricted quartic angle potential with respect to x=cos(theta)"""
 
-    dquart = 4 * a * x**3 + 3 * b * x**2 + 2 * c * x + d
-    drep = k * (2 * x) / ( (1 - x**2)**2 )
+    cos = torch.cos(x)
+    sin = torch.sin(x)
+
+    dquart = -4 * a * sin * cos**3 - 3 * b * sin * cos**2 - 2 * c * cos * sin + d
+    drep = -k * (2 * cos) / ( (sin)**3 )
     dV = dquart + drep
 
     return dV
@@ -46,8 +51,8 @@ def find_minmax(params, left_region, right_region):
     def find_in_range(x_range):
         minima = []
         maxima = []
-        search_min = max(x_range[0], -0.99)
-        search_max = min(x_range[1], 0.99)
+        search_min = max(x_range[0], 0.01)
+        search_max = min(x_range[1], 3.13)
         
         if search_max <= search_min:
             return minima, maxima
@@ -107,8 +112,8 @@ def fit_rb_from_potential_estimates(
             dG_nz[mask],
             p0=[1, 0, 0, 0, 1e-2, torch.argmin(dG_nz[mask])],
             bounds=(
-                (1e-3, -np.inf, -np.inf, -np.inf, 1e-3, -np.inf),
-                (1e3, np.inf, np.inf, np.inf, np.inf, np.inf),
+                (0, -np.inf, -np.inf, -np.inf, 1e-3, -np.inf),
+                (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf),
             ),
             maxfev=5000,
         )
@@ -119,7 +124,7 @@ def fit_rb_from_potential_estimates(
         
         #has_tail_extrema = (len(left_minima) > 0 or len(left_maxima) > 0 or 
         #                   len(right_minima) > 0 or len(right_maxima) > 0)
-        has_tail_extrema = len(right_minima) > 0 or len(right_maxima) > 0
+        has_tail_extrema = len(left_minima) > 0 or len(left_maxima) > 0
         
         if has_tail_extrema:
             extrema_info = []

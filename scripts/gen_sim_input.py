@@ -20,6 +20,7 @@ from jsonargparse import CLI
 import pickle as pck
 
 import numpy as np
+import mdtraj as md
 
 from mlcg.data import AtomicData
 import torch
@@ -103,8 +104,13 @@ def process_sim_input(
             skip_residues=skip_residues,
             virtual_atoms=cg_virtual_atoms,
         )
-
-        cg_trajs = samples.input_traj.atom_slice(samples.cg_atom_indices)
+        if cg_virtual_atoms:
+            cg_map = samples.cg_map
+            np_trajs = np.einsum('nmi,km->nki', samples.input_traj.xyz, cg_map)
+            tmp_topology = samples.input_traj.atom_slice(samples.cg_atom_indices).topology
+            cg_trajs = md.Trajectory(np_trajs, tmp_topology)
+        else:
+            cg_trajs = samples.input_traj.atom_slice(samples.cg_atom_indices)
         cg_masses = (
             np.array([atom.element.mass for atom in cg_trajs[0].topology.atoms])
             / mass_scale
