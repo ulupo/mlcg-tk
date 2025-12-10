@@ -105,10 +105,10 @@ def fit_rb_from_potential_estimates(
             restricted_quartic_angle,
             bin_centers_nz[mask],
             dG_nz[mask],
-            p0=[1, 0, 0, 0, 1e-4, torch.argmin(dG_nz[mask])],
+            p0=[1, 0, 0, 0, 1e-2, torch.argmin(dG_nz[mask])],
             bounds=(
-                (0, -np.inf, -np.inf, -np.inf, 1e-5, -np.inf),
-                (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf),
+                (1e-3, -np.inf, -np.inf, -np.inf, 1e-3, -np.inf),
+                (1e3, np.inf, np.inf, np.inf, np.inf, np.inf),
             ),
             maxfev=5000,
         )
@@ -117,15 +117,16 @@ def fit_rb_from_potential_estimates(
             popt, left_tail, right_tail
         )
         
-        has_tail_extrema = (len(left_minima) > 0 or len(left_maxima) > 0 or 
-                           len(right_minima) > 0 or len(right_maxima) > 0)
+        #has_tail_extrema = (len(left_minima) > 0 or len(left_maxima) > 0 or 
+        #                   len(right_minima) > 0 or len(right_maxima) > 0)
+        has_tail_extrema = len(right_minima) > 0 or len(right_maxima) > 0
         
         if has_tail_extrema:
             extrema_info = []
-            if left_minima:
-                extrema_info.append(f"left minima: {left_minima}")
-            if left_maxima:
-                extrema_info.append(f"left maxima: {left_maxima}")
+            #if left_minima:
+            #    extrema_info.append(f"left minima: {left_minima}")
+            #if left_maxima:
+            #    extrema_info.append(f"left maxima: {left_maxima}")
             if right_minima:
                 extrema_info.append(f"right minima: {right_minima}")
             if right_maxima:

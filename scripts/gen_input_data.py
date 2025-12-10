@@ -163,6 +163,7 @@ def build_neighborlists(
     mol_num_batches: Optional[int] = 1,
     atoms_batch_size: Optional[int] = None,
     collection_cls: Type[SampleCollection] = SampleCollection,
+    cg_virtual_atoms: Optional[List[Dict]] = None,
 ):
     """
     Generates neighbour lists for all samples in dataset using prior term information
@@ -212,6 +213,12 @@ def build_neighborlists(
     atoms_batch_size : int
         unused in this function
         present to allow the use of the same .yaml config for process_raw_dataset and build_neighborlists
+    collection_cls : Type[SampleCollection]
+        SampleCollection class to use for dataset
+    cg_virtual_atoms : List[Dict]
+        Dictionary mapping CG bead indices to lists of atomistic atom indices.
+        These atomistic atoms will be weighted equally (1/N each) in the CG mapping.
+        Format: cg_bead_index: [atom1_index, atom2_index, ...]
     """
     dataset = RawDataset(dataset_name, names, tag, collection_cls=collection_cls)
     for samples in tqdm(dataset, f"Building NL for {dataset_name} dataset..."):
@@ -224,6 +231,7 @@ def build_neighborlists(
             embedding_function=embedding_func,
             embedding_dict=embedding_map,
             skip_residues=skip_residues,
+            virtual_atoms=cg_virtual_atoms,
         )
 
         prior_nls = samples.get_prior_nls(

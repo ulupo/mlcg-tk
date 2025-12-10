@@ -250,6 +250,77 @@ class SampleCollection:
 
         cg_map = np.zeros((len(cg_atom_idx), self.input_traj.n_atoms))
         cg_map[[i for i in range(len(cg_atom_idx))], cg_atom_idx] = 1
+        
+        if virtual_atoms is not None:
+            # Convert list of dictionaries to dictionary format if needed
+            if isinstance(virtual_atoms, list):
+                virtual_atoms_dict = {}
+                for item in virtual_atoms:
+                    if isinstance(item, dict):
+                        # Handle YAML format where each list item is a dict with integer keys
+                        if len(item) == 1 and isinstance(list(item.keys())[0], int):
+                            cg_bead_idx = list(item.keys())[0]
+                            atom_indices = list(item.values())[0]
+                            virtual_atoms_dict[cg_bead_idx] = atom_indices
+                        else:
+                            # Handle standard format with named keys
+                            cg_bead_idx = item.get('cg_bead_index') or item.get('cg_bead_idx') or item.get('bead_index')
+                            atom_indices = item.get('atom_indices') or item.get('atoms') or item.get('atom_list')
+                            
+                            if cg_bead_idx is not None and atom_indices is not None:
+                                virtual_atoms_dict[cg_bead_idx] = atom_indices
+                            else:
+                                warnings.warn(f"WARNING: Invalid virtual atom entry format: {item}")
+                    else:
+                        warnings.warn(f"WARNING: Expected dictionary in virtual atoms list, got: {type(item)}")
+                virtual_atoms = virtual_atoms_dict
+            
+            for cg_bead_idx, atom_indices in virtual_atoms.items():
+                if cg_bead_idx >= len(cg_atom_idx):
+                    warnings.warn(f"WARNING: Virtual atom CG bead index {cg_bead_idx} is out of range.")
+                    continue
+                
+                # Validate atom indices
+                invalid_indices = [idx for idx in atom_indices if idx >= self.input_traj.n_atoms]
+                if invalid_indices:
+                    warnings.warn(f"WARNING: Invalid atom indices {invalid_indices} for virtual atom mapping.")
+                    continue
+                
+                # Get information about the CG bead being mapped
+                cg_bead_info = cg_df.iloc[cg_bead_idx]
+                cg_bead_name = cg_bead_info['name']
+                cg_bead_res = cg_bead_info['resName']
+ 
+                for key, value in embedding_dict.items():
+                    if key == cg_bead_res:
+                        bead_type_num = value
+                        break
+
+                print(f"\nVirtual atom mapping for CG bead {cg_bead_idx} of type {bead_type_num}:")
+                print(f"  Initially given to AA atom {cg_bead_name} of residue: {cg_bead_res}")
+                
+                # Clear the original mapping for this CG bead
+                cg_map[cg_bead_idx, :] = 0
+                
+                # Set equal weights for all atoms in the virtual atom list
+                n_atoms = len(atom_indices)
+                weight = 1.0 / n_atoms
+                
+                print(f"  Mapping to {n_atoms} atoms with weight {weight:.4f} each:")
+                for atom_idx in atom_indices:
+                    cg_map[cg_bead_idx, atom_idx] = weight
+                    
+                    # Get atom information from the original topology dataframe
+                    atom_info = self.top_dataframe.iloc[atom_idx]
+                    atom_name = atom_info['name']
+                    atom_res = atom_info['resName']
+                    atom_resSeq = atom_info['resSeq']
+                    atom_chainID = atom_info['chainID']
+                    
+                    print(f"    - Atom {atom_idx}: {atom_name} (residue: {atom_res}, chain: {atom_chainID})")
+                
+                print(f"  Total weight: {n_atoms * weight:.4f}")
+        
         if not all([sum(row) == 1 for row in cg_map]):
             warnings.warn("WARNING: Slice mapping matrix is not unique.")
         if not all([row.tolist().count(1) == 1 for row in cg_map]):

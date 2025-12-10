@@ -42,6 +42,7 @@ def process_sim_input(
     mass_scale: Optional[float] = 418.4,
     collection_cls: Type[SampleCollection] = SampleCollection,
     smpl_loader: Type[DatasetLoader] = SimInput_loader,
+    cg_virtual_atoms: Optional[List[Dict]] = None,
 ):
     """
     Generates input AtomicData objects for coarse-grained simulations
@@ -74,6 +75,14 @@ def process_sim_input(
         List of PriorBuilder objects and their corresponding parameters
     mass_scale : str
         Optional scaling factor applied to atomic masses
+    collection_cls : Type[SampleCollection]
+        SampleCollection class to use for dataset
+    smpl_loader : Type[DatasetLoader]
+        DatasetLoader class to use for loading raw data
+    cg_virtual_atoms : List[Dict]
+        Dictionary mapping CG bead indices to lists of atomistic atom indices.
+        These atomistic atoms will be weighted equally (1/N each) in the CG mapping.
+        Format: cg_bead_index: [atom1_index, atom2_index, ...]
     """
     cg_coord_list = []
     cg_type_list = []
@@ -92,6 +101,7 @@ def process_sim_input(
             embedding_function=embedding_func,
             embedding_dict=embedding_map,
             skip_residues=skip_residues,
+            virtual_atoms=cg_virtual_atoms,
         )
 
         cg_trajs = samples.input_traj.atom_slice(samples.cg_atom_indices)
