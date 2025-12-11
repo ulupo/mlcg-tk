@@ -83,7 +83,7 @@ The following example script shows how delta forces can be computed on a computi
 #SBATCH --output=trpcage_delta_forces_gpu.log
 #SBATCH --job-name=test_job
 
-mlcg-tk-produce_delta_forces produce_delta_forces --config configuration_files/trpcage_produce.yaml
+mlcg-tk-produce_delta_forces produce_delta_forces --config configuration_files/trpcage_delta_forces.yaml
 ```
 Here, make sure to specify `cuda` for the `device` option in the configuration file.
 Note that depending on the GPU being used and its available memory, it may be necessary to adjust the `batch_size`.
