@@ -254,7 +254,6 @@ class SampleCollection:
         cg_map[[i for i in range(len(cg_atom_idx))], cg_atom_idx] = 1
         
         if virtual_atoms is not None:
-            # Convert list of dictionaries to dictionary format if needed
             if isinstance(virtual_atoms, list):
                 virtual_atoms_dict = {}
                 for item in virtual_atoms:
@@ -265,7 +264,6 @@ class SampleCollection:
                             atom_indices = list(item.values())[0]
                             virtual_atoms_dict[cg_bead_idx] = atom_indices
                         else:
-                            # Handle standard format with named keys
                             cg_bead_idx = item.get('cg_bead_index') or item.get('cg_bead_idx') or item.get('bead_index')
                             atom_indices = item.get('atom_indices') or item.get('atoms') or item.get('atom_list')
                             
@@ -282,13 +280,11 @@ class SampleCollection:
                     warnings.warn(f"WARNING: Virtual atom CG bead index {cg_bead_idx} is out of range.")
                     continue
                 
-                # Validate atom indices
                 invalid_indices = [idx for idx in atom_indices if idx >= self.input_traj.n_atoms]
                 if invalid_indices:
                     warnings.warn(f"WARNING: Invalid atom indices {invalid_indices} for virtual atom mapping.")
                     continue
                 
-                # Get information about the CG bead being mapped
                 cg_bead_info = cg_df.iloc[cg_bead_idx]
                 cg_bead_name = cg_bead_info['name']
                 cg_bead_res = cg_bead_info['resName']

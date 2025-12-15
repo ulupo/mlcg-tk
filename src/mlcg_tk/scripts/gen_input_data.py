@@ -86,6 +86,12 @@ def process_raw_dataset(
         force mappings (as defined by `cg_mapping_strategy`) will be computed in batches of this size. To significantly improve
         computational efficiency, it is assumed that structures have ordered residues. If `atoms_batch_size` exceeds the total number of atoms
         in the molecule, all atoms will be processed at once (default behavior).
+    collection_cls : Type[SampleCollection]
+        SampleCollection class to use for dataset
+    cg_virtual_atoms : List[Dict]
+        Dictionary mapping CG beads indices to lists of atomistic atom indices.
+        These atoms will be weighted equally (1/N each) in the CG mapping.
+        Format: cg_bead_index: [atom1_index, atom2_index, ...]
 
     """
     dataset = RawDataset(dataset_name, 

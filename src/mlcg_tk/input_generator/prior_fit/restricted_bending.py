@@ -24,7 +24,7 @@ def restricted_quartic_angle(x, a, b, c, d, k, v_0):
     return V
 
 def dx_restricted_quartic_angle(x, a, b, c, d, k):
-    """Derivative of the restricted quartic angle potential with respect to x=cos(theta)"""
+    """Derivative of the restricted quartic angle potential"""
 
     cos = torch.cos(x)
     sin = torch.sin(x)
