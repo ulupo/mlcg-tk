@@ -74,6 +74,10 @@ def process_sim_input(
         List of PriorBuilder objects and their corresponding parameters
     mass_scale : str
         Optional scaling factor applied to atomic masses
+    collection_cls : Type[SampleCollection]
+        Class type for sample collection
+    smpl_loader : Type[DatasetLoader]
+        Loader class for dataset
     """
     cg_coord_list = []
     cg_type_list = []

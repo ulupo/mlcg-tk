@@ -105,14 +105,14 @@ def fit_rb_from_potential_estimates(
             restricted_quartic_angle,
             bin_centers_nz[mask],
             dG_nz[mask],
-            p0=[1, 0, 0, 0, 1e-4, torch.argmin(dG_nz[mask])],
+            p0=[1, 0, 0, 0, 1e-3, torch.argmin(dG_nz[mask])],
             bounds=(
                 (0, -np.inf, -np.inf, -np.inf, 1e-5, -np.inf),
                 (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf),
             ),
             maxfev=5000,
         )
-        
+ 
         left_minima, left_maxima, right_minima, right_maxima = find_minmax(
             popt, left_tail, right_tail
         )

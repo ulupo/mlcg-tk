@@ -88,6 +88,8 @@ def process_raw_dataset(
         force mappings (as defined by `cg_mapping_strategy`) will be computed in batches of this size. To significantly improve
         computational efficiency, it is assumed that structures have ordered residues. If `atoms_batch_size` exceeds the total number of atoms
         in the molecule, all atoms will be processed at once (default behavior).
+    collection_cls : Type[SampleCollection]
+        Class type for sample collection
 
     """
     dataset = RawDataset(dataset_name, 
@@ -212,6 +214,8 @@ def build_neighborlists(
     atoms_batch_size : int
         unused in this function
         present to allow the use of the same .yaml config for process_raw_dataset and build_neighborlists
+    collection_cls : Type[SampleCollection]
+        Class type for sample collection
     """
     dataset = RawDataset(dataset_name, names, tag, collection_cls=collection_cls)
     for samples in tqdm(dataset, f"Building NL for {dataset_name} dataset..."):
