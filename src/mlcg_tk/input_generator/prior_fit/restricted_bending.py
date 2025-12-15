@@ -9,9 +9,9 @@ def restricted_quartic_angle(x, a, b, c, d, k, v_0):
     """Quartic angle potential with repulsive 1/sin^2 term to avoid
     singularities at 0 and pi angles.
 
-    .. math:
-        V(\theta) = a cos(\theta)^4 + b cos(\theta)^3 + c cos(\theta)^2 + d cos(\theta)
-        + \frac{k}{\sin^2(\theta)} + V0
+    .. math::
+
+        V(\theta) = a cos(\theta)^4 + b cos(\theta)^3 + c cos(\theta)^2 + d cos(\theta) + \frac{k}{\sin^2(\theta)} + V0
 
     """
     cos = torch.cos(x)
