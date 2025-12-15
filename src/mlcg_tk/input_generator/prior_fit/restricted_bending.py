@@ -111,7 +111,7 @@ def fit_rb_from_potential_estimates(
 
     # Define tail regions (outside the data range)
     left_tail = (0.0, first_nonzero_x)
-    right_tail = (last_nonzero_x, 3.141)
+    right_tail = (last_nonzero_x, np.pi)
 
     try:
         popt, _ = curve_fit(
