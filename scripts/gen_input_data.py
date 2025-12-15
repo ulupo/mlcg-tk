@@ -39,6 +39,7 @@ def process_raw_dataset(
     mol_num_batches: Optional[int] = 1,
     atoms_batch_size: Optional[int] = None,
     collection_cls: Type[SampleCollection] = SampleCollection,
+    cg_virtual_atoms: Optional[List[Dict]] = None,
 ):
     """
     Applies coarse-grained mapping to coordinates and forces using input sample
@@ -106,6 +107,7 @@ def process_raw_dataset(
             embedding_function=embedding_func,
             embedding_dict=embedding_map,
             skip_residues=skip_residues,
+            virtual_atoms=cg_virtual_atoms,
         )
 
         aa_coords, aa_forces = sample_loader.load_coords_forces(
