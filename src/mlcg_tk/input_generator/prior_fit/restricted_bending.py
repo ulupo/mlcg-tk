@@ -8,9 +8,9 @@ from scipy.integrate import trapezoid
 def restricted_quartic_angle(x, a, b, c, d, k, v_0):
     """Quartic angle potential with repulsive 1/sin^2 term to avoid
     singularities at 0 and pi angles.
-    
+
     .. math:
-        V(\theta) = a cos(\theta)^4 + b cos(\theta)^3 + c cos(\theta)^2 + d cos(\theta) 
+        V(\theta) = a cos(\theta)^4 + b cos(\theta)^3 + c cos(\theta)^2 + d cos(\theta)
         + \frac{k}{\sin^2(\theta)} + V0
 
     """
@@ -37,52 +37,59 @@ def dx_restricted_quartic_angle_numpy(x, a, b, c, d, k):
 
 def find_minmax(params, left_region, right_region):
     """Find minima and maxima of the potential in specified regions.
-    
+
     Args:
         params: (a, b, c, d, k, v_0) parameters
-        left_region: tuple (x_min, x_max) for left tail region (e.g., (-1.0, -0.9))
-        right_region: tuple (x_min, x_max) for right tail region (e.g., (0.0, 1.0))
-    
+        left_region: tuple (x_min, x_max) for left tail region (e.g., (0.0, min_angle))
+        right_region: tuple (x_min, x_max) for right tail region (e.g., (max_angle, pi))
+
     Returns:
         tuple: (left_minima, left_maxima, right_minima, right_maxima)
     """
     a, b, c, d, k, _ = params
-    
+
     def find_in_range(x_range):
         minima = []
         maxima = []
         search_min = max(x_range[0], 0.01)
         search_max = min(x_range[1], 3.13)
-        
+
         if search_max <= search_min:
             return minima, maxima
-        
+
         for x0 in np.linspace(search_min, search_max, 20):
             try:
-                root = fsolve(dx_restricted_quartic_angle_numpy, x0, args=(a, b, c, d, k), full_output=True)
+                root = fsolve(
+                    dx_restricted_quartic_angle_numpy,
+                    x0,
+                    args=(a, b, c, d, k),
+                    full_output=True,
+                )
                 x_root = root[0][0]
                 info = root[1]
-                
+
                 # Check if fsolve converged and root is in valid range
-                if info['fvec'][0]**2 < 1e-6 and x_range[0] <= x_root <= x_range[1]:
+                if info["fvec"][0] ** 2 < 1e-6 and x_range[0] <= x_root <= x_range[1]:
                     eps = 1e-6
-                    d2V = (dx_restricted_quartic_angle_numpy(x_root + eps, a, b, c, d, k) - 
-                           dx_restricted_quartic_angle_numpy(x_root - eps, a, b, c, d, k)) / (2 * eps)
-                    
-                    if d2V > 0:  
+                    d2V = (
+                        dx_restricted_quartic_angle_numpy(x_root + eps, a, b, c, d, k)
+                        - dx_restricted_quartic_angle_numpy(x_root - eps, a, b, c, d, k)
+                    ) / (2 * eps)
+
+                    if d2V > 0:
                         if not any(abs(x_root - m) < 1e-4 for m in minima):
                             minima.append(x_root)
-                    elif d2V < 0:  
+                    elif d2V < 0:
                         if not any(abs(x_root - m) < 1e-4 for m in maxima):
                             maxima.append(x_root)
             except:
                 continue
-        
+
         return sorted(minima), sorted(maxima)
-    
+
     left_minima, left_maxima = find_in_range(left_region)
     right_minima, right_maxima = find_in_range(right_region)
-    
+
     return left_minima, left_maxima, right_minima, right_maxima
 
 def fit_rb_from_potential_estimates(
@@ -90,21 +97,21 @@ def fit_rb_from_potential_estimates(
 ) -> Dict:
     r"""Fits restricted quartic angle potential. If minima or maxima are found in the tail regions
     (outside the non-zero data range), refits with a=0, b=0 to collapse to quadratic."""
-    
+
     integral = torch.tensor(
         float(trapezoid(dG_nz.cpu().numpy(), bin_centers_nz.cpu().numpy()))
     )
     mask = torch.abs(dG_nz) > 1e-4 * torch.abs(integral)
-    
+
     nonzero_indices = torch.where(mask)[0]
-    
+
     first_nonzero_x = bin_centers_nz[nonzero_indices[0]].item()
     last_nonzero_x = bin_centers_nz[nonzero_indices[-1]].item()
-    
+
     # Define tail regions (outside the data range)
     left_tail = (0.0, first_nonzero_x)
     right_tail = (last_nonzero_x, 3.141)
-    
+
     try:
         popt, _ = curve_fit(
             restricted_quartic_angle,
@@ -117,14 +124,18 @@ def fit_rb_from_potential_estimates(
             ),
             maxfev=5000,
         )
- 
+
         left_minima, left_maxima, right_minima, right_maxima = find_minmax(
             popt, left_tail, right_tail
         )
-        
-        has_tail_extrema = (len(left_minima) > 0 or len(left_maxima) > 0 or 
-                           len(right_minima) > 0 or len(right_maxima) > 0)
-        
+
+        has_tail_extrema = (
+            len(left_minima) > 0
+            or len(left_maxima) > 0
+            or len(right_minima) > 0
+            or len(right_maxima) > 0
+        )
+
         if has_tail_extrema:
             extrema_info = []
             if left_minima:
@@ -135,13 +146,15 @@ def fit_rb_from_potential_estimates(
                 extrema_info.append(f"right minima: {right_minima}")
             if right_maxima:
                 extrema_info.append(f"right maxima: {right_maxima}")
-            
-            print(f"Extrema found in tail regions ({', '.join(extrema_info)}). Refitting with a=0, b=0")
-            
+
+            print(
+                f"Extrema found in tail regions ({', '.join(extrema_info)}). Refitting with a=0, b=0"
+            )
+
             # Refit with a=0 and b=0 (collapse to quadratic + repulsive term)
             def restricted_quartic_angle_constrained(x, c, d, k, v_0):
                 return restricted_quartic_angle(x, 0, 0, c, d, k, v_0)
-            
+
             popt_constrained, _ = curve_fit(
                 restricted_quartic_angle_constrained,
                 bin_centers_nz[mask],
@@ -153,7 +166,7 @@ def fit_rb_from_potential_estimates(
                 ),
                 maxfev=5000,
             )
-            
+
             stat = {
                 "a": torch.tensor(0.0),
                 "b": torch.tensor(0.0),
@@ -181,5 +194,5 @@ def fit_rb_from_potential_estimates(
             "k": torch.tensor(float("nan")),
             "v_0": torch.tensor(float("nan")),
         }
-    
+
     return stat
