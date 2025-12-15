@@ -29,8 +29,20 @@ def dx_restricted_quartic_angle(x, a, b, c, d, k):
     cos = torch.cos(x)
     sin = torch.sin(x)
 
-    dquart = -4 * a * sin * cos**3 - 3 * b * sin * cos**2 - 2 * c * cos * sin + d
+    dquart = -4 * a * sin * cos**3 - 3 * b * sin * cos**2 - 2 * c * cos * sin - d * sin
     drep = -k * (2 * cos) / ( (sin)**3 )
+    dV = dquart + drep
+
+    return dV
+
+def dx_restricted_quartic_angle_numpy(x, a, b, c, d, k):
+    """Derivative of the restricted quartic angle potential with respect to x=theta (numpy version for fsolve)"""
+
+    cos = np.cos(x)
+    sin = np.sin(x)
+
+    dquart = -4 * a * sin * cos**3 - 3 * b * sin * cos**2 - 2 * c * cos * sin - d * sin
+    drep = -k * (2 * cos) / (sin**3)
     dV = dquart + drep
 
     return dV
@@ -59,15 +71,15 @@ def find_minmax(params, left_region, right_region):
         
         for x0 in np.linspace(search_min, search_max, 20):
             try:
-                root = fsolve(dx_restricted_quartic_angle, x0, args=(a, b, c, d, k), full_output=True)
+                root = fsolve(dx_restricted_quartic_angle_numpy, x0, args=(a, b, c, d, k), full_output=True)
                 x_root = root[0][0]
                 info = root[1]
                 
                 # Check if fsolve converged and root is in valid range
                 if info['fvec'][0]**2 < 1e-6 and x_range[0] <= x_root <= x_range[1]:
                     eps = 1e-6
-                    d2V = (dx_restricted_quartic_angle(x_root + eps, a, b, c, d, k) - 
-                           dx_restricted_quartic_angle(x_root - eps, a, b, c, d, k)) / (2 * eps)
+                    d2V = (dx_restricted_quartic_angle_numpy(x_root + eps, a, b, c, d, k) - 
+                           dx_restricted_quartic_angle_numpy(x_root - eps, a, b, c, d, k)) / (2 * eps)
                     
                     if d2V > 0:  
                         if not any(abs(x_root - m) < 1e-4 for m in minima):
@@ -102,40 +114,34 @@ def fit_rb_from_potential_estimates(
     last_nonzero_x = bin_centers_nz[nonzero_indices[-1]].item()
     
     # Define tail regions (outside the data range)
-    left_tail = (-1.0, first_nonzero_x)
-    right_tail = (last_nonzero_x, 1.0)
+    left_tail = (0.0, first_nonzero_x)
+    right_tail = (last_nonzero_x, np.pi)
     
     try:
         popt, _ = curve_fit(
             restricted_quartic_angle,
             bin_centers_nz[mask],
             dG_nz[mask],
-            p0=[1, 0, 0, 0, 1e-2, torch.argmin(dG_nz[mask])],
+            p0=[1, 0, 0, 0, 1e-3, torch.argmin(dG_nz[mask])],
             bounds=(
-                (0, -np.inf, -np.inf, -np.inf, 1e-3, -np.inf),
+                (0, -np.inf, -np.inf, -np.inf, 1e-5, -np.inf),
                 (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf),
             ),
             maxfev=5000,
         )
         
-        left_minima, left_maxima, right_minima, right_maxima = find_minmax(
+        left_minima, left_maxima, _, _ = find_minmax(
             popt, left_tail, right_tail
         )
         
-        #has_tail_extrema = (len(left_minima) > 0 or len(left_maxima) > 0 or 
-        #                   len(right_minima) > 0 or len(right_maxima) > 0)
         has_tail_extrema = len(left_minima) > 0 or len(left_maxima) > 0
         
         if has_tail_extrema:
             extrema_info = []
-            #if left_minima:
-            #    extrema_info.append(f"left minima: {left_minima}")
-            #if left_maxima:
-            #    extrema_info.append(f"left maxima: {left_maxima}")
-            if right_minima:
-                extrema_info.append(f"right minima: {right_minima}")
-            if right_maxima:
-                extrema_info.append(f"right maxima: {right_maxima}")
+            if left_minima:
+                extrema_info.append(f"left minima: {left_minima}")
+            if left_maxima:
+                extrema_info.append(f"left maxima: {left_maxima}")
             
             print(f"Extrema found in tail regions ({', '.join(extrema_info)}). Refitting with a=0, b=0")
             
