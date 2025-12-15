@@ -200,6 +200,7 @@ class SampleCollection:
         embedding_function: str,
         embedding_dict: str,
         skip_residues: Optional[List[str]] = None,
+        virtual_atoms: Optional[List[Dict]] = None,
     ):
         """
         Applies mapping function to atomistic topology to obtain CG representation.
