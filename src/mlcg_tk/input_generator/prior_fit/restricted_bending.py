@@ -6,7 +6,8 @@ from scipy.integrate import trapezoid
 
 
 def restricted_quartic_angle(x, a, b, c, d, k, v_0):
-    """Quartic angle potential with repulsive 1/sin^2 term to avoid
+    r"""
+    Quartic angle potential with repulsive 1/sin^2 term to avoid
     singularities at 0 and pi angles.
 
     .. math::
